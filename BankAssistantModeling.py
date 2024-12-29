@@ -15,79 +15,80 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.impute import SimpleImputer
 from scipy import stats
 
-# Verilerin yüklenmesi
-veriler = pd.read_excel('bankaverileri_smote.xlsx')
+# Loading the data
+veriler = pd.read_excel('BankData_SMOTE.xlsx')
 
-# Eksik verileri tespit etme ve doldurma
-print("Eksik veri sayısı (her sütun için):")
+# Detecting and filling missing data
+print("Number of missing values (for each column):")
 print(veriler.isnull().sum())
 
-# Sayısal sütunları doldurmak için SimpleImputer kullanımı
+# Using SimpleImputer to fill numerical columns
 sayisal_sutunlar = veriler.select_dtypes(include=['float64', 'int64']).columns
-imputer_sayisal = SimpleImputer(strategy='mean')  # Ortalama ile doldurma
+imputer_sayisal = SimpleImputer(strategy='mean')  # Filling with the mean
 veriler[sayisal_sutunlar] = imputer_sayisal.fit_transform(veriler[sayisal_sutunlar])
 
-# Kategorik sütunları doldurmak için SimpleImputer kullanımı
+# Using SimpleImputer to fill categorical columns
 kategorik_sutunlar = veriler.select_dtypes(include=['object']).columns
-imputer_kategorik = SimpleImputer(strategy='most_frequent')  # En sık tekrar eden değer ile doldurma
+imputer_kategorik = SimpleImputer(strategy='most_frequent')  # Filling with the most frequent value
 veriler[kategorik_sutunlar] = imputer_kategorik.fit_transform(veriler[kategorik_sutunlar])
 
-# Eksik veri kontrolü sonrası
-print("\nEksik veri kontrolü sonrası (her sütun için):")
+# After missing data check
+print("\nAfter missing data check (for each column):")
 print(veriler.isnull().sum())
 
-# Kategorik sütunları sayısallaştırma
+# Converting categorical columns to numerical values
 label_encoders = {}
 for column in ['Cinsiyet', 'Meslek', 'Eğitim Düzeyi', 'Medeni Durum', 'Konut', 'Araç', 'Arsa']:
     le = LabelEncoder()
     veriler[column] = le.fit_transform(veriler[column].astype(str))
-    label_encoders[column] = le  # Encoderları saklıyoruz
+    label_encoders[column] = le  # Storing the encoders
 
-# Bağımsız değişkenler (X) ve bağımlı değişken (y) belirleme
-X = veriler.drop(columns=['Kredi Notu'])  # 'Kredi Notu' dışındaki tüm sütunları bağımsız değişken olarak alıyoruz
-y = veriler['Kredi Notu']  # 'Kredi Notu' bağımlı değişken olarak alıyoruz
+# Determining independent variables (X) and dependent variable (y)
+X = veriler.drop(columns=['Kredi Notu'])  # Taking all columns except 'Kredi Notu' as independent variables
+y = veriler['Kredi Notu']  # Taking 'Kredi Notu' as the dependent variable
 
-# Verileri %75 eğitim ve %25 test olarak ayırma
+# Splitting the data into 75% training and 25% testing
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
 
-# **Özellik Standardizasyonu** (Ölçeklendirme)
+# Feature Standardization (Scaling)
 scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)  # Eğitim verisini ölçeklendir
-X_test_scaled = scaler.transform(X_test)  # Test verisini ölçeklendir
+X_train_scaled = scaler.fit_transform(X_train)  # Scaling the training data
+X_test_scaled = scaler.transform(X_test)  # Scaling the test data
 
-# **Ağaç Modelini Geliştirme** (Daha fazla ağaç, derinliği artırma, min_samples_split ve min_samples_leaf optimizasyonu)
+# Developing the Tree Model (Increasing the number of trees, increasing depth, optimizing min_samples_split and min_samples_leaf)
 random_forest_model = RandomForestRegressor(
     random_state=0, 
-    n_estimators=200,  # Ağaç sayısını artırdık
-    max_depth=10,  # Derinliği azaltmak yerine bu değeri artırdık
-    min_samples_split=5,  # Min. split değeri daha büyük
-    min_samples_leaf=2,  # Min. leaf sayısını artırarak daha sağlam ağaçlar
-    n_jobs=-1  # İşlemci çekirdeklerini tam verimli kullanmak için
+    n_estimators=200,  # We increased the number of trees.
+    max_depth=10,  # Instead of reducing the depth, we increased this value.
+    min_samples_split=5,  # The min. split value is larger.
+    min_samples_leaf=2,  # By increasing the min. leaf count, we created more robust trees.
+    n_jobs=-1  # To fully utilize the processor cores.
 )
 
-# Modeli eğitme
+# Training the model
 random_forest_model.fit(X_train_scaled, y_train)
 
-# Test verisi ile kredi notlarını tahmin etme
+# Predicting credit scores with the test data
 y_pred_rf = random_forest_model.predict(X_test_scaled)
 
-# Model performansını değerlendirme (Random Forest)
+# Evaluating model performance (Random Forest)
 mse_rf = mean_squared_error(y_test, y_pred_rf)
 r2_rf = r2_score(y_test, y_pred_rf)
 
-print("\nRandom Forest - Test Verisi MSE (Standardize Edilmiş):", mse_rf)
-print("Random Forest - Test Verisi R² Skoru (Standardize Edilmiş):", r2_rf)
+print("\nRandom Forest - Test Data MSE (Standardized):", mse_rf)
+print("Random Forest - Test Data R² Score (Standardized):", r2_rf)
 
-# Linear Regression modelini oluşturma ve eğitme
+# Creating and training the Linear Regression model
 linear_model = LinearRegression()
 linear_model.fit(X_train_scaled, y_train)
 
-# Test verisi ile kredi notlarını tahmin etme
+# Predicting credit scores with the test data
 y_pred_lr = linear_model.predict(X_test_scaled)
 
-# Model performansını değerlendirme (Linear Regression)
+# Evaluating model performance (Linear Regression)
 mse_lr = mean_squared_error(y_test, y_pred_lr)
 r2_lr = r2_score(y_test, y_pred_lr)
 
-print("\nLinear Regression - Ortalama Kare Hata (MSE):", mse_lr)
-print("Linear Regression - R-Kare (R²) Skoru:", r2_lr)
+print("\nLinear Regression - Mean Squared Error (MSE):", mse_lr)
+print("Linear Regression - R-Squared (R²) Score:", r2_lr)
+
