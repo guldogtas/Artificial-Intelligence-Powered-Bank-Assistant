@@ -4,9 +4,8 @@ Created on Fri Dec 13 16:13:10 2024
 
 @author: guldogtas
 """
-
 def kredi_notu_hesapla(gelir, ev_sayisi, araba_sayisi, arsa_sayisi, borc, calisma_yili, egitim, medeni_durum):
-    # Gelir Düzeyi Puanı
+    # Income Level Points
     if gelir < 10000:
         gelir_puan = 500
     elif 10000 <= gelir < 20000:
@@ -18,16 +17,16 @@ def kredi_notu_hesapla(gelir, ev_sayisi, araba_sayisi, arsa_sayisi, borc, calism
     else:
         gelir_puan = 4000
     
-    # Ev Sayısı Puanı
-    ev_puan = min(ev_sayisi * 100, 300)  # Her ev için 100 puan, maksimum 300 puan
+    # Number of Houses Points
+    ev_puan = min(ev_sayisi * 100, 300)  # 100 points for each house, maximum 300 points
 
-    # Araba Sayısı Puanı
-    araba_puan = min(araba_sayisi * 60, 180)  # Her araba için 60 puan, maksimum 180 puan
+    # Number of Cars Points
+    araba_puan = min(araba_sayisi * 60, 180)  # 60 points for each car, maximum 180 points
 
-    # Arsa Sayısı Puanı
-    arsa_puan = min(arsa_sayisi * 80, 240)  # Her arsa için 80 puan, maksimum 240 puan
+    # Number of Land Points
+    arsa_puan = min(arsa_sayisi * 80, 240)  # 80 points for each land, maximum 240 points
 
-    # Borç Durumu Puanı
+    # Debt Status Points
     if borc == 0:
         borc_puan = 2000
     elif borc < 10000:
@@ -37,7 +36,7 @@ def kredi_notu_hesapla(gelir, ev_sayisi, araba_sayisi, arsa_sayisi, borc, calism
     else:
         borc_puan = 50
 
-    # Çalışma Süresi Puanı
+    # Working Years Points
     if calisma_yili <= 5:
         calisma_puan = 500
     elif 6 <= calisma_yili <= 10:
@@ -47,7 +46,7 @@ def kredi_notu_hesapla(gelir, ev_sayisi, araba_sayisi, arsa_sayisi, borc, calism
     else:
         calisma_puan = 3000
 
-    # Eğitim Düzeyi Puanı
+    # Education Level Points
     egitim_puan = {
         "Ortaokul Mezunu": 50,
         "Lise Mezunu": 100,
@@ -56,13 +55,13 @@ def kredi_notu_hesapla(gelir, ev_sayisi, araba_sayisi, arsa_sayisi, borc, calism
         "Doktora": 250
     }.get(egitim, 0)
 
-    # Medeni Durum Puanı
+    # Marital Status Points
     medeni_puan = 100 if medeni_durum == "Evli" else 50
 
-    # Kredi Notu Hesaplama
+    # Credit Score Calculation
     kredi_notu = (
         (gelir_puan * 0.3) +
-        ((ev_puan + araba_puan + arsa_puan) * 0.15) +  # Toplam varlık puanı
+        ((ev_puan + araba_puan + arsa_puan) * 0.15) +  # Total asset points
         (borc_puan * 0.15) +
         (calisma_puan * 0.2) +
         (egitim_puan * 0.1) +
@@ -70,7 +69,7 @@ def kredi_notu_hesapla(gelir, ev_sayisi, araba_sayisi, arsa_sayisi, borc, calism
     )
     return round(kredi_notu)
 
-# Kullanıcıdan girdi al
+# Get user input
 gelir = float(input("Aylık Gelir Düzeyinizi Girin (Örneğin: 54000): "))
 ev_sayisi = int(input("Sahip Olduğunuz Ev Sayısını Girin (Örneğin: 1): "))
 araba_sayisi = int(input("Sahip Olduğunuz Araba Sayısını Girin (Örneğin: 1): "))
@@ -80,8 +79,9 @@ calisma_yili = int(input("Toplam Çalışma Sürenizi Girin (Yıl olarak, Örne�
 egitim = input("Eğitim Düzeyinizi Girin (Ortaokul Mezunu, Lise Mezunu, Üniversite, Yüksek Lisans, Doktora): ").capitalize()
 medeni_durum = input("Medeni Durumunuzu Girin (Evli veya Bekar): ").capitalize()
 
-# Kredi notunu hesapla
+# Calculate credit score
 kredi_notu = kredi_notu_hesapla(gelir, ev_sayisi, araba_sayisi, arsa_sayisi, borc, calisma_yili, egitim, medeni_durum)
 
-# Sonucu göster
+#  Display result
 print(f"Hesaplanan Kredi Notunuz: {kredi_notu}")
+
